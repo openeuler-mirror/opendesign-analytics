@@ -2,12 +2,12 @@
   "name": "@opensig/open-analytics",
   "version": "0.0.8",
   "description": "opendesign analytics",
+  "license": "MIT",
   "main": "dist/open-analytics.mjs",
   "types": "dist/open-analytics.d.ts",
   "files": [
     "dist"
   ],
-  "license": "MulanPSL-2.0",
   "sideEffects": false,
   "scripts": {
     "dev": "vite",
