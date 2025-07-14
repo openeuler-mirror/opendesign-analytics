@@ -2,12 +2,12 @@
   "name": "opendesign-analytics",
   "version": "1.0.0",
   "description": "",
+  "license": "MIT",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev:demo": "pnpm --filter demo dev",
     "dev": "pnpm --filter @opensig/open-analytics dev"
   },
-  "license": "MulanPSL-2.0",
   "dependencies": {},
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.7.2",
