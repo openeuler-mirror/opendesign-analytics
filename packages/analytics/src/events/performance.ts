@@ -52,7 +52,7 @@ export default {
     });
     onTTFB((m) => {
       doneTtfb = true;
-      entry = m.entries[0];
+      entry = m.entries[0] as PerformanceNavigationTiming;
       data.$ttfb = m.value;
       data.$navigationEntry = entry;
       data.$load = entry.domComplete - entry.startTime;

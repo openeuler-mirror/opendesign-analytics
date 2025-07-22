@@ -1,6 +1,6 @@
 {
   "name": "@opensig/open-analytics",
-  "version": "0.0.8",
+  "version": "1.0.0",
   "description": "opendesign analytics",
   "license": "MIT",
   "main": "dist/open-analytics.mjs",
@@ -13,17 +13,16 @@
     "dev": "vite",
     "build": " vite build"
   },
+  "dependencies": {
+    "ua-parser-js": "1.0.34",
+    "uuid": "11.1.0",
+    "web-vitals": "3.5.0"
+  },
   "devDependencies": {
-    "@types/ua-parser-js": "^0.7.39",
-    "@types/uuid": "^10.0.0",
     "typescript": "~5.3.3",
     "vite": "^5.3.4",
+    "@types/ua-parser-js": "^0.7.39",
     "vite-plugin-dts": "^3.7.3"
-  },
-  "dependencies": {
-    "ua-parser-js": "^1.0.38",
-    "uuid": "^10.0.0",
-    "web-vitals": "^4.2.2"
   },
   "publishConfig": {
     "access": "public"
