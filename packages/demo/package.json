@@ -9,7 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@opensig/opendesign": "0.0.67",
+    "@opensig/opendesign": "0.0.78",
     "@opensig/open-analytics": "workspace:^",
     "normalize.css": "^8.0.1",
     "vue": "^3.4.21",

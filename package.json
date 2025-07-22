@@ -8,7 +8,6 @@
     "dev:demo": "pnpm --filter demo dev",
     "dev": "pnpm --filter @opensig/open-analytics dev"
   },
-  "dependencies": {},
   "devDependencies": {
     "@rushstack/eslint-patch": "^1.7.2",
     "@types/node": "^20.11.22",
