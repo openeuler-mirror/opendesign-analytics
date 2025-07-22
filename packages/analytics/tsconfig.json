@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "sourceMap": true,
+    "outDir": "dist",
+    "module": "esnext",
+    "target": "ES2015",
+    "allowJs": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "strict": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "types": [
+      "vite/client",
+    ],
+    "lib": [
+      "DOM",
+      "ESNext",
+    ]
+  },
+  "include": [
+    "src",
+    "env.d.ts",
+  ],
+}
