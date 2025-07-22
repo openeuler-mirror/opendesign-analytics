@@ -11,7 +11,8 @@
   "sideEffects": false,
   "scripts": {
     "dev": "vite",
-    "build": " vite build"
+    "build": " vite build",
+    "release": "pnpm publish --registry https://registry.npmjs.org"
   },
   "dependencies": {
     "ua-parser-js": "1.0.34",
