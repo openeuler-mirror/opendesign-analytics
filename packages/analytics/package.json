@@ -1,6 +1,6 @@
 {
   "name": "@opensig/open-analytics",
-  "version": "0.0.5-sp.2",
+  "version": "0.0.5-sp.3",
   "description": "opendesign analytics",
   "main": "dist/open-analytics.mjs",
   "types": "dist/open-analytics.d.ts",
