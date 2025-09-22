@@ -53,7 +53,7 @@ export default {
         doneTtfb = true;
         const entry = m.entries[0];
         data.ttfb = m.value;
-        data.navigationEntry = entry;
+        data.navigationEntry = entry as PerformanceNavigationTiming;
         data.load = entry.domComplete - entry.startTime;
         doResolve();
       });
