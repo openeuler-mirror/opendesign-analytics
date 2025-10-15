@@ -15,7 +15,7 @@
     "release": "pnpm publish --registry https://registry.npmjs.org"
   },
   "dependencies": {
-    "ua-parser-js": "1.0.34",
+    "ua-parser-js": "1.0.37",
     "uuid": "11.1.0",
     "web-vitals": "3.5.2"
   },
