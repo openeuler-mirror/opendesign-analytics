@@ -4,7 +4,7 @@
 
 # Release Note
 
-## 0.0.5-sp.3
+## 0.0.5-sp.4
 
 1. `web-vitals`版本升级为`3.5.2`
 
