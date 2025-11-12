@@ -14,12 +14,12 @@ const modules: Record<string, Record<string, Event>> = import.meta.glob(['./*.ts
 
 const Events = new Map<string, Event>();
 
-for (const path in modules) {
+Object.keys(modules).forEach(path => {
   const m = modules[path].default;
   if (m) {
     Events.set(m.event, m);
   }
-}
+})
 
 export function isInnerEvent(event: string) {
   return Events.has(event);
