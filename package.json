@@ -9,11 +9,14 @@
     "dev": "pnpm --filter @opensig/open-analytics dev"
   },
   "devDependencies": {
-    "@rushstack/eslint-patch": "^1.7.2",
-    "@types/node": "^20.11.22",
-    "@vue/eslint-config-typescript": "^12.0.0",
-    "eslint": "^8.57.0",
-    "eslint-plugin-vue": "^9.22.0",
-    "typescript": "~5.3.3"
+    "@eslint/js": "^9.39.1",
+    "@types/node": "catalog:typescript",
+    "eslint": "catalog:lint",
+    "eslint-config-prettier": "catalog:lint",
+    "eslint-plugin-vue": "catalog:lint",
+    "globals": "catalog:lint",
+    "prettier": "catalog:lint",
+    "typescript": "catalog:typescript",
+    "typescript-eslint": "catalog:lint"
   }
 }

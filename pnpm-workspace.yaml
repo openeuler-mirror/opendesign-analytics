@@ -1,2 +1,67 @@
 packages:
-  - 'packages/**'
+  - packages/**
+
+catalogs:
+  build:
+    '@opensig/open-scripts': 1.0.5
+    '@rollup/plugin-terser': ^0.4.4
+    svgo: ^3.3.2
+    vite: 7.3.2
+    vite-plugin-dts: ^4.5.3
+    vite-plugin-inspect: ^11.2.0
+    vue-tsc: 2.2.8
+  css:
+    '@opensig/opendesign-token': 0.0.10
+    clean-css: ^5.3.3
+    normalize.css: ^8.0.1
+    sass: ^1.71.1
+    sass-embedded: 1.85.1
+  io:
+    commander: ^13.1.0
+    fs-extra: ^11.3.0
+    glob: ^11.0.1
+    jiti: 2.6.1
+  lint:
+    '@eslint/js': ^9.39.1
+    eslint: ^9.39.1
+    eslint-config-prettier: ^10.1.8
+    eslint-plugin-vue: ^10.6.1
+    globals: ^16.5.0
+    prettier: 3.6.2
+    typescript-eslint: ^8.48.0
+  markdown:
+    '@shikijs/langs': ^3.7.0
+    '@shikijs/themes': ^3.7.0
+    gray-matter: ^4.0.3
+    markdown-it: ^14.1.0
+    markdown-it-async: ^2.2.0
+    shiki: ^3.7.0
+    unplugin-vue-markdown: ^28.3.1
+  typescript:
+    '@types/clean-css': ^4.2.11
+    '@types/fs-extra': ^9.0.13
+    '@types/glob': ^8.1.0
+    '@types/markdown-it': ^14.1.0
+    '@types/node': ^22.19.1
+    '@types/ua-parser-js': ^0.7.39
+    ts-morph: ^27.0.2
+    typescript: ~5.8.3
+  utils:
+    '@opensig/open-analytics': 1.0.1
+    dayjs: 1.11.13
+    magic-string: ^0.30.17
+    ua-parser-js: 1.0.37
+    uuid: 14.0.0
+    web-vitals: 4.2.4
+    vite-node: ^3.2.4
+  vue:
+    '@vitejs/plugin-vue': ^6.0.3
+    '@vitejs/plugin-vue-jsx': ^5.1.3
+    '@vue/compiler-dom': ^3.5.17
+    '@vue/compiler-sfc': ^3.5.17
+    '@vueuse/core': 10.11.1
+    pinia: ^3.0.3
+    vue: ^3.5.25
+    vue-component-meta: ^2.2.10
+    vue-docgen-api: ^4.79.2
+    vue-router: ^4.6.3
