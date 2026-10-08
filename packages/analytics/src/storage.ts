@@ -35,7 +35,11 @@ export class Storage {
       once,
     };
 
-    this.store.setItem(key, JSON.stringify(data));
+    try {
+      this.store.setItem(key, JSON.stringify(data));
+    } catch {
+      // 存储不可用或写入失败时静默忽略，不干扰宿主应用
+    }
   }
   remove(key: string) {
     this.store.removeItem(key);
