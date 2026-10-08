@@ -8,7 +8,7 @@ interface Event {
   collector: EventCollector;
 }
 
-const modules: Record<string, Record<string, Event>> = import.meta.glob(['./*.ts', '!./keys.ts'], {
+const modules: Record<string, Record<string, Event>> = import.meta.glob(['./*.ts', '!./_keys.ts', '!./index.ts'], {
   eager: true,
 });
 
