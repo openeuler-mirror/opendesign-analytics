@@ -1,6 +1,10 @@
 packages:
   - packages/**
 
+allowBuilds:
+  '@parcel/watcher': true
+  esbuild: true
+
 catalogs:
   build:
     '@opensig/open-scripts': 1.0.5
