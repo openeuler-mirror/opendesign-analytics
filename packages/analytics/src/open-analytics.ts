@@ -98,18 +98,24 @@ export class OpenAnalytics {
     const client = this.#store.getAlways(aKey, {
       defaultValue: () => ({
         id: uniqueId(),
+        created_at: Date.now(),
       }),
       setOption: {
         expire: Date.now() + Constant.CLIENT_EXPIRE_TIME,
       },
-      onValid: () => {
-        this.#store.setExpire(aKey, Date.now() + Constant.CLIENT_EXPIRE_TIME);
+      onValid: (value) => {
+        // 兼容历史数据：无created_at时以当前时间补齐
+        value.created_at = value.created_at ?? Date.now();
+        this.#store.set(aKey, value, {
+          expire: Date.now() + Constant.CLIENT_EXPIRE_TIME,
+        });
       },
     }).value;
 
     return {
       uId: '',
       cId: client.id,
+      first_visit_time: client.created_at,
       aId: appId,
       oa_version: packageJson.version,
       viewport_width: window.innerWidth,
