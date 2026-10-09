@@ -16,6 +16,7 @@ export interface EventHeader {
   env?: Environment; // 当前运行环境
   uId?: string; // 用户id
   cId?: string; // 客户端匿名标识，清除浏览器缓存销毁
+  first_visit_time?: number; // 首次访问时间（cId创建时间）
   aId?: string; // 应用id
   oa_version?: string; // OA版本
   screen_width?: number; // 屏幕宽度
@@ -43,7 +44,7 @@ export interface OpenAnalyticsParams {
   request: (data: ReportData) => Promise<boolean> | void; // 上报数据的接口
   appKey?: string; // 采集app的key，用于区分多app上报
   immediate?: boolean; // 全局设置是否立即上报
-  requestInterval?: number; //上报间隔
+  requestInterval?: number; // 上报间隔
   maxEvents?: number;
   storage?: typeof localStorage | typeof sessionStorage;
   requestPlan?: (requestFn: () => void) => void;
