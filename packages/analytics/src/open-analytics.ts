@@ -56,7 +56,7 @@ export class OpenAnalytics {
   #StoreKey: StoreKeyIns;
   // 自定义上报策略
   #requestPlan?: (requestFn: () => void) => void;
-  // 上报间隔，默认3s
+  // 上报间隔，默认5s
   #requestInterval: number;
   #maxEvents: number;
 
