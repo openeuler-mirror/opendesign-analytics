@@ -77,6 +77,7 @@ export class OpenAnalytics {
 
     this.#firstReport = true;
 
+    // 存量队列迁移：仅读取一次，队列不再持久化写入，成功上报后清理key
     this.#eventData = this.#store.getAlways(this.#StoreKey.events, {
       defaultValue: () => [],
       save: false,
@@ -154,8 +155,6 @@ export class OpenAnalytics {
       this.#eventData.shift();
     }
     if (this.enabled) {
-      this.#store.set(this.#StoreKey.events, this.#eventData);
-
       this.#runRequestPlan(immediate);
     }
   }
@@ -202,12 +201,13 @@ export class OpenAnalytics {
       rlt.then((isSuccess) => {
         if (isSuccess) {
           this.#eventData = [];
-          this.#store.set(this.#StoreKey.events, []);
+          // 清理存量迁移的队列key，稳态下为空操作
+          this.#store.remove(this.#StoreKey.events);
         }
       });
     } else {
       this.#eventData = [];
-      this.#store.set(this.#StoreKey.events, []);
+      this.#store.remove(this.#StoreKey.events);
     }
   }
   /**
@@ -255,8 +255,6 @@ export class OpenAnalytics {
           event.sId = this.#sessionId;
         }
       });
-      // 将数据存储到本地
-      this.#store.set(this.#StoreKey.events, this.#eventData);
       // 执行上报策略
       this.#runRequestPlan();
     } else if (this.#timer) {
