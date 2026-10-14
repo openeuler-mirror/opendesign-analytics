@@ -3,7 +3,7 @@ import { whenDocumentReady, isFunction, isPromise, uniqueId, isClient } from './
 import { Constant } from './constant';
 import { reportInnerEvent, isInnerEvent } from './events';
 import packageJson from '../package.json';
-import { EventContent, EventData, EventHeader, OpenAnalyticsParams, ReportRequest, EventParams, Environment } from './types';
+import { EventContent, EventData, EventHeader, OpenAnalyticsParams, ReportRequest, ReportData, EventParams, Environment } from './types';
 
 class AnalyticsStoreKey {
   appPrefix: string;
@@ -43,11 +43,29 @@ function createStorageTarget() {
   };
 }
 
+/**
+ * 根据地址创建默认的上报请求
+ */
+function createRequestByUrl(url: string): ReportRequest {
+  return (data: ReportData) => {
+    return fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
+      .then((response) => response.ok)
+      .catch(() => false);
+  };
+}
+
 export class OpenAnalytics {
   #store: InstanceType<typeof Storage>;
   #timer: number | null;
   #firstReport: boolean;
   #request: ReportRequest;
+  #beaconUrl: string;
   #eventData: EventData[];
   #immediate: boolean;
   #sessionId: number = 0;
@@ -67,7 +85,10 @@ export class OpenAnalytics {
    */
   constructor(params: OpenAnalyticsParams) {
     this.#store = new Storage(createStorageTarget());
-    this.#request = params.request;
+    const { request } = params;
+    this.#request = isFunction(request) ? request : createRequestByUrl(request);
+    // 关页冲刷地址：显式配置优先，未配置时默认取request字符串
+    this.#beaconUrl = params.beaconUrl ?? (typeof request === 'string' ? request : '');
     this.#immediate = params.immediate ?? false;
     this.#appKey = params.appKey ?? '';
     this.#StoreKey = new AnalyticsStoreKey(params.appKey);
@@ -88,6 +109,10 @@ export class OpenAnalytics {
     };
 
     this.enabled = false;
+
+    if (isClient) {
+      this.#registerPageEndFlush();
+    }
   }
   /**
    * 初始化通用数据
@@ -211,6 +236,35 @@ export class OpenAnalytics {
     } else {
       this.#eventData = [];
       this.#store.remove(this.#StoreKey.events);
+    }
+  }
+  /**
+   * 注册页面结束冲刷：页面隐藏或关闭时，将内存队列通过sendBeacon直发
+   */
+  #registerPageEndFlush() {
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'hidden') {
+        this.#doPageEndFlush();
+      }
+    });
+    window.addEventListener('pagehide', () => {
+      this.#doPageEndFlush();
+    });
+  }
+  /**
+   * 页面结束时冲刷数据
+   */
+  #doPageEndFlush() {
+    if (!this.#beaconUrl || !this.enabled || this.#eventData.length === 0) {
+      return;
+    }
+    const reportData = JSON.stringify({
+      header: this.#header,
+      body: this.#eventData,
+    });
+    // sendBeacon由浏览器保证在页面卸载后送达；入队失败时保留队列，等待定时上报重试
+    if (navigator.sendBeacon(this.#beaconUrl, reportData)) {
+      this.#eventData = [];
     }
   }
   /**
