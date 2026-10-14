@@ -50,7 +50,7 @@ export class OpenAnalytics {
   #request: ReportRequest;
   #eventData: EventData[];
   #immediate: boolean;
-  #sessionId: string = '';
+  #sessionId: number = 0;
   #appKey: string = '';
   #header: EventHeader;
   #StoreKey: StoreKeyIns;
@@ -126,23 +126,26 @@ export class OpenAnalytics {
     };
   }
   /**
-   * 获取会话id，每次获取，延长有效期
+   * 获取会话id（即会话开始时间戳），每次获取，延长有效期
    * @param sKey session key
    */
   #getSessionId(sKey: string) {
-    const session = this.#store.getAlways(sKey, {
-      defaultValue: () => ({
-        id: uniqueId(),
-      }),
-      setOption: {
-        expire: Date.now() + Constant.SESSION_EXPIRE_TIME,
-      },
+    const session = this.#store.get(sKey, {
       onValid: () => {
         this.#store.setExpire(sKey, Date.now() + Constant.SESSION_EXPIRE_TIME);
       },
     }).value;
 
-    return session.id;
+    // 历史版本会话id为uuid（对象存储），视为过期，重新生成时间戳会话
+    if (typeof session !== 'number') {
+      const newSession = Date.now();
+      this.#store.set(sKey, newSession, {
+        expire: Date.now() + Constant.SESSION_EXPIRE_TIME,
+      });
+      return newSession;
+    }
+
+    return session;
   }
   /**
    * 搜集数据
@@ -251,7 +254,7 @@ export class OpenAnalytics {
       this.#sessionId = this.#getSessionId(this.#StoreKey.session);
       // 给内存中事件添加sessionId
       this.#eventData.forEach((event) => {
-        if (event.sId === '') {
+        if (event.sId === 0) {
           event.sId = this.#sessionId;
         }
       });
@@ -283,7 +286,7 @@ export class OpenAnalytics {
     if (!event) {
       return;
     }
-    const sId = this.enabled ? this.#getSessionId(this.#StoreKey.session) : '';
+    const sId = this.enabled ? this.#getSessionId(this.#StoreKey.session) : 0;
 
     if (!isInnerEvent(event)) {
       const cData = isFunction(content) ? await content() : {};

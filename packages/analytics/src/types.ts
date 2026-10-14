@@ -7,7 +7,7 @@ export interface EventData {
   event: string; // 事件名
   time: number; // 事件采集时间
   properties: EventContent; // 上报的事件数据
-  sId: string; // 会话id
+  sId: number; // 会话id（会话开始时间戳）
 }
 
 export type Environment = 'development' | 'production' | (string & {});
