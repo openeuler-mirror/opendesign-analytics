@@ -47,6 +47,5 @@ export interface OpenAnalyticsParams {
   immediate?: boolean; // 全局设置是否立即上报
   requestInterval?: number; // 上报间隔
   maxEvents?: number;
-  storage?: typeof localStorage | typeof sessionStorage;
   requestPlan?: (requestFn: () => void) => void;
 }
