@@ -43,6 +43,7 @@ export interface OpenAnalyticsParams {
   env?: Environment; // 当前环境
   request: string | ReportRequest; // 上报地址，或上报数据的接口
   beaconUrl?: string; // 关页冲刷的sendBeacon直发地址，默认取request字符串
+  cookieDomain?: string; // Cookie的Domain属性，跨子域共享标识时配置，如.example.com
   appKey?: string; // 采集app的key，用于区分多app上报
   immediate?: boolean; // 全局设置是否立即上报
   requestInterval?: number; // 上报间隔

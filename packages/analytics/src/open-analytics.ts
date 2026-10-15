@@ -2,6 +2,7 @@ import { Storage } from './storage';
 import { whenDocumentReady, isFunction, isPromise, uniqueId, isClient } from './utils';
 import { Constant } from './constant';
 import { reportInnerEvent, isInnerEvent } from './events';
+import { setCookie, getCookie, removeCookie } from './cookie';
 import packageJson from '../package.json';
 import { EventContent, EventData, EventHeader, OpenAnalyticsParams, ReportRequest, ReportData, EventParams, Environment } from './types';
 
@@ -10,12 +11,17 @@ class AnalyticsStoreKey {
   client: string;
   session: string;
   events: string;
+  cId: string;
+  sId: string;
   constructor(appKey: string = '') {
     this.appPrefix = appKey ? `${appKey}-` : '';
-
+    // legacy localStorage key，仅用于存量迁移与cookie不可用时的降级
     this.client = this.getKey('client');
     this.session = this.getKey('session');
     this.events = this.getKey('events');
+    // cookie key
+    this.cId = this.getKey('cId');
+    this.sId = this.getKey('sId');
   }
   getKey(key: string) {
     return `${Constant.OA_PREFIX}-${this.appPrefix}${key}`;
@@ -66,6 +72,7 @@ export class OpenAnalytics {
   #firstReport: boolean;
   #request: ReportRequest;
   #beaconUrl: string;
+  #cookieDomain: string;
   #eventData: EventData[];
   #immediate: boolean;
   #sessionId: number = 0;
@@ -89,6 +96,7 @@ export class OpenAnalytics {
     this.#request = isFunction(request) ? request : createRequestByUrl(request);
     // 关页冲刷地址：显式配置优先，未配置时默认取request字符串
     this.#beaconUrl = params.beaconUrl ?? (typeof request === 'string' ? request : '');
+    this.#cookieDomain = params.cookieDomain ?? '';
     this.#immediate = params.immediate ?? false;
     this.#appKey = params.appKey ?? '';
     this.#StoreKey = new AnalyticsStoreKey(params.appKey);
@@ -120,23 +128,7 @@ export class OpenAnalytics {
    * @param appId {string}
    */
   #initHeader(keys: StoreKeyIns, appId: string): EventHeader {
-    const aKey = keys.client;
-    const client = this.#store.getAlways(aKey, {
-      defaultValue: () => ({
-        id: uniqueId(),
-        created_at: Date.now(),
-      }),
-      setOption: {
-        expire: Date.now() + Constant.CLIENT_EXPIRE_TIME,
-      },
-      onValid: (value) => {
-        // 兼容历史数据：无created_at时以当前时间补齐
-        value.created_at = value.created_at ?? Date.now();
-        this.#store.set(aKey, value, {
-          expire: Date.now() + Constant.CLIENT_EXPIRE_TIME,
-        });
-      },
-    }).value;
+    const client = this.#getClientId(keys);
 
     return {
       uId: '',
@@ -151,26 +143,104 @@ export class OpenAnalytics {
     };
   }
   /**
-   * 获取会话id（即会话开始时间戳），每次获取，延长有效期
+   * 获取客户端标识：cookie优先，自动迁移legacy localStorage数据，cookie不可用时降级localStorage
+   */
+  #getClientId(keys: StoreKeyIns): { id: string; created_at: number } {
+    const cookieName = keys.cId;
+    const raw = getCookie(cookieName);
+    if (raw) {
+      // 滑动续期
+      setCookie(cookieName, raw, {
+        maxAge: Constant.CLIENT_EXPIRE_TIME,
+        domain: this.#cookieDomain,
+      });
+      const [rawId, createdStr] = raw.split('.');
+      return {
+        id: rawId || uniqueId(),
+        created_at: Number(createdStr) || Date.now(),
+      };
+    }
+
+    // cookie不存在：读取legacy localStorage（存在则迁移，不存在则新建）
+    const legacy = this.#store.getAlways(keys.client, {
+      defaultValue: () => ({
+        id: uniqueId(),
+        created_at: Date.now(),
+      }),
+      setOption: {
+        expire: Date.now() + Constant.CLIENT_EXPIRE_TIME,
+      },
+      onValid: (value) => {
+        // 兼容历史数据：无created_at时以当前时间补齐
+        value.created_at = value.created_at ?? Date.now();
+        this.#store.set(keys.client, value, {
+          expire: Date.now() + Constant.CLIENT_EXPIRE_TIME,
+        });
+      },
+    }).value;
+    const clientId = legacy.id || uniqueId();
+    const createdAt = legacy.created_at ?? Date.now();
+
+    // 写入cookie并回读校验：成功则清理legacy key（迁移完成），失败则保留localStorage作为降级
+    setCookie(cookieName, `${clientId}.${createdAt}`, {
+      maxAge: Constant.CLIENT_EXPIRE_TIME,
+      domain: this.#cookieDomain,
+    });
+    if (getCookie(cookieName)) {
+      this.#store.remove(keys.client);
+    }
+
+    return { id: clientId, created_at: createdAt };
+  }
+  /**
+   * 获取会话id（即会话开始时间戳）：cookie优先，每次获取滑动续期，cookie不可用时降级localStorage
    * @param sKey session key
    */
   #getSessionId(sKey: string) {
+    const cookieName = this.#StoreKey.sId;
+    const raw = getCookie(cookieName);
+    if (raw) {
+      const sId = Number(raw);
+      if (sId > 0) {
+        // 滑动续期
+        setCookie(cookieName, raw, {
+          maxAge: Constant.SESSION_EXPIRE_TIME,
+          domain: this.#cookieDomain,
+        });
+        return sId;
+      }
+    }
+
+    // cookie不存在：读取legacy localStorage（数字为存量迁移，其余视为过期）
     const session = this.#store.get(sKey, {
       onValid: () => {
         this.#store.setExpire(sKey, Date.now() + Constant.SESSION_EXPIRE_TIME);
       },
     }).value;
+    if (typeof session === 'number') {
+      setCookie(cookieName, String(session), {
+        maxAge: Constant.SESSION_EXPIRE_TIME,
+        domain: this.#cookieDomain,
+      });
+      if (getCookie(cookieName)) {
+        this.#store.remove(sKey);
+      }
+      return session;
+    }
 
-    // 历史版本会话id为uuid（对象存储），视为过期，重新生成时间戳会话
-    if (typeof session !== 'number') {
-      const newSession = Date.now();
+    // 新建会话
+    const newSession = Date.now();
+    setCookie(cookieName, String(newSession), {
+      maxAge: Constant.SESSION_EXPIRE_TIME,
+      domain: this.#cookieDomain,
+    });
+    if (!getCookie(cookieName)) {
+      // cookie不可用，降级localStorage持久化
       this.#store.set(sKey, newSession, {
         expire: Date.now() + Constant.SESSION_EXPIRE_TIME,
       });
-      return newSession;
     }
-
-    return session;
+    return newSession;
   }
   /**
    * 搜集数据
@@ -321,6 +391,8 @@ export class OpenAnalytics {
       this.#store.remove(this.#StoreKey.events);
       this.#store.remove(this.#StoreKey.client);
       this.#store.remove(this.#StoreKey.session);
+      removeCookie(this.#StoreKey.cId, this.#cookieDomain);
+      removeCookie(this.#StoreKey.sId, this.#cookieDomain);
     }
   }
   /**
