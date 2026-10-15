@@ -76,7 +76,6 @@ const oa = new OpenAnalytics({
 | immediate | `boolean` | `false` | 事件立即上报，不等待批量间隔 |
 | requestInterval | `number` | `5000` | 批量上报间隔（毫秒） |
 | maxEvents | `number` | `500` | 内存队列上限，超出丢弃最早事件 |
-| requestPlan | `(requestFn: () => void) => void` | — | 自定义上报调度策略 |
 
 ## 实例方法
 

@@ -38,7 +38,7 @@
 
 - **采集层**：内置事件（web-vitals 性能、PV、点击）与业务自定义事件统一走 `report()` 入口；
 - **队列层**：单实例内存队列，无持久化，多标签页互不影响；
-- **调度层**：immediate 立即 / 首报等 documentReady / 定时器轮询 / requestPlan 完全接管，四档策略；
+- **调度层**：immediate 立即 / 首报等 documentReady / 定时器轮询，三档策略；
 - **通道层**：常规批量走 `request`（字符串地址或宿主函数），关页冲刷走 `sendBeacon`，两条通道使用同一份报文结构；
 - **标识层**：cId / sId 存于 first-party cookie，生成 header 通用字段，与事件流解耦。
 
@@ -55,7 +55,6 @@ flowchart TB
         IMM["immediate 立即"]
         FIRST["首报 · documentReady"]
         TIMER["定时器 · requestInterval=5s"]
-        PLAN["requestPlan · 宿主接管"]
     end
 
     subgraph channel["通道层"]
@@ -69,8 +68,8 @@ flowchart TB
 
     INNER --> QUEUE
     BIZ --> QUEUE
-    QUEUE --> IMM & FIRST & TIMER & PLAN
-    IMM & FIRST & TIMER & PLAN --> REQ
+    QUEUE --> IMM & FIRST & TIMER
+    IMM & FIRST & TIMER --> REQ
     QUEUE --> BEACON
     PAGEEND --> BEACON
     REQ --> ENDPOINT
@@ -328,7 +327,6 @@ flowchart TB
     C["#collect(event, immediate)"] --> P{"#runRequestPlan"}
     P -- "事件级 immediate<br/>或全局 immediate" --> S1["立即 #doSendEventData"]
     P -- "首报（#firstReport）" --> S2["documentReady 后发送"]
-    P -- "配置了 requestPlan" --> S3["宿主策略接管<br/>requestFn 由宿主择机调用"]
     P -- "默认" --> S4["启动 5s 定时器轮询<br/>持续重调度"]
 
     classDef now fill:#dcfce7,stroke:#166534

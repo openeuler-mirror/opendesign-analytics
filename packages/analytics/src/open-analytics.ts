@@ -79,8 +79,6 @@ export class OpenAnalytics {
   #appKey: string = '';
   #header: EventHeader;
   #StoreKey: StoreKeyIns;
-  // 自定义上报策略
-  #requestPlan?: (requestFn: () => void) => void;
   // 上报间隔，默认5s
   #requestInterval: number;
   #maxEvents: number;
@@ -234,7 +232,10 @@ export class OpenAnalytics {
       maxAge: Constant.SESSION_EXPIRE_TIME,
       domain: this.#cookieDomain,
     });
-    if (!getCookie(cookieName)) {
+    if (getCookie(cookieName)) {
+      // cookie可用：清理legacy key（可能残留uuid对象等过期格式）
+      this.#store.remove(sKey);
+    } else {
       // cookie不可用，降级localStorage持久化
       this.#store.set(sKey, newSession, {
         expire: Date.now() + Constant.SESSION_EXPIRE_TIME,
@@ -268,18 +269,14 @@ export class OpenAnalytics {
       this.#firstReport = false;
       whenDocumentReady(() => this.#doSendEventData());
     } else {
-      if (isFunction(this.#requestPlan)) {
-        this.#requestPlan(this.#doSendEventData);
-      } else {
-        const run = () => {
-          this.#timer = window.setTimeout(() => {
-            this.#doSendEventData();
-            run();
-          }, this.#requestInterval);
-        };
-        if (!this.#timer) {
+      const run = () => {
+        this.#timer = window.setTimeout(() => {
+          this.#doSendEventData();
           run();
-        }
+        }, this.#requestInterval);
+      };
+      if (!this.#timer) {
+        run();
       }
     }
   }
@@ -291,7 +288,8 @@ export class OpenAnalytics {
       return;
     }
     const reportData = {
-      header: this.#header,
+      // 快照header，避免发送后header变更影响已传出的报文
+      header: { ...this.#header },
       body: this.#eventData,
     };
     const rlt = this.#request(reportData);
