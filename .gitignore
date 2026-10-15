@@ -13,6 +13,10 @@ dist
 dist-ssr
 *.local
 
+# publish时由prepack钩子从根目录同步，勿提交
+packages/analytics/README.md
+packages/analytics/*.tgz
+
 # Editor directories and files
 .vscode/*
 !.vscode/settings.json
