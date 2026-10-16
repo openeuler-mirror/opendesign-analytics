@@ -10,7 +10,6 @@
   ],
   "sideEffects": false,
   "scripts": {
-    "dev": "vite",
     "build": " vite build",
     "prepack": "node -e \"require('node:fs').copyFileSync('../../README.md', 'README.md')\"",
     "postpack": "node -e \"require('node:fs').rmSync('README.md', { force: true })\"",

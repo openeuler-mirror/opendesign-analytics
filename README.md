@@ -7,7 +7,7 @@ OpenDesign 前端数据采集方案：埋点 SDK 与演示站点，采集页面�
 | 目录 | 说明 |
 |---|---|
 | packages/analytics | 埋点 SDK `@opensig/open-analytics`，框架无关，构建产物为单文件 ES 模块 |
-| packages/demo | Vue 3 演示站点，dev server 内置模拟采集端点，报文直接打印在终端 |
+| packages/playground | Vue 3 演示站点，dev server 内置模拟采集端点，报文直接打印在终端 |
 
 - 版本记录：[CHANGELOG.md](./CHANGELOG.md)
 
@@ -101,6 +101,5 @@ const oa = new OpenAnalytics({
 
 ```bash
 pnpm install
-pnpm dev:demo    # 演示站点（3200 端口），上报报文打印在 dev server 终端
-pnpm dev         # SDK 调试页（3300 端口）
+pnpm dev    # 演示站点（3200 端口），上报报文打印在 dev server 终端
 ```
