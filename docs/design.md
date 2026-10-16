@@ -109,7 +109,6 @@ packages/analytics/
 │   ├── constant.ts           TTL / 间隔 / 上限常量
 │   ├── types.ts              对外类型
 │   └── utils.ts              工具函数
-├── test/                     SDK 调试页（pnpm dev，3300 端口）
 └── dist/                     构建产物（单文件 ES 模块 + 类型）
 ```
 
@@ -480,11 +479,10 @@ npm 包页面只读包目录下的 README，而文档统一维护在仓库根目
 
 ```bash
 pnpm install
-pnpm dev:demo    # 演示站点，3200 端口
-pnpm dev         # SDK 调试页，3300 端口
+pnpm dev    # 演示站点，3200 端口
 ```
 
-演示站点的 dev server 内置模拟采集端点（`packages/demo/vite.config.ts` 的 mock-report 插件）：接收 `/report` POST 并将报文打印到终端，定时上报与关页 beacon 均可见。
+演示站点（packages/playground）的 dev server 内置模拟采集端点（`vite.config.ts` 的 mock-report 插件）：接收 `/report` POST 并将报文打印到终端，定时上报与关页 beacon 均可见。
 
 验证要点：
 

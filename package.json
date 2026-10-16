@@ -5,8 +5,7 @@
   "license": "MIT",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev:demo": "pnpm --filter demo dev",
-    "dev": "pnpm --filter @opensig/open-analytics dev"
+    "dev": "pnpm --filter playground dev"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",
